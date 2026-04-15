@@ -1,0 +1,56 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Environment variables
+.env
+src/main/webapp/WEB-INF/.env
+
+### Gradle ###
+.gradle/
+
+### Mac OS ###
+.DS_Store
+
+# Generated / binary files
+*.bin
+*.lock
+*.probe
+*.class
+*.jar
+*.war
+*.log
+*.tmp
+*.cache
+
+# Gradle wrapper (keep the scripts, ignore the jar)
+!gradle/wrapper/gradle-wrapper.jar
