@@ -3,6 +3,7 @@ package vn.edu.hcmuaf.fit.service;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import vn.edu.hcmuaf.fit.dao.UserDAO;
 import vn.edu.hcmuaf.fit.model.User;
+import vn.edu.hcmuaf.fit.util.EmailUtils;
 
 public class UserService {
     private static final UserService instance = new UserService();
@@ -35,6 +36,8 @@ public class UserService {
 
     public void register(String username, String password, String email) {
         new UserDAO().register(username, hashPassword(password), email);
+
+        EmailUtils.sendActivationEmail(email, username);
     }
 
     public boolean changePassword(int accountID, String oldPassword, String newPassword) {

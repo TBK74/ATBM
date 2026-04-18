@@ -12,6 +12,13 @@ public class EmailUtils {
     private static final String APP_EMAIL = "23130130@st.hcmuaf.edu.vn";
     private static final String APP_PASSWORD = "xgqd uztg bbrb wtdf";
 
+    public static void sendActivationEmail(String toEmail, String username) {
+        String subject = "Kích hoạt tài khoản hệ thống";
+        String body = "<h3>Xin chào " + username + ",</h3>"
+                + "<p>Cảm ơn bạn đã đăng ký. Vui lòng nhấn vào link để hoàn tất kích hoạt tài khoản của bạn.</p>";
+        sendEmail(toEmail, subject, body);
+    }
+
     public static void sendEmail(String toEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -39,11 +46,6 @@ public class EmailUtils {
 
         } catch (MessagingException e) {
             e.printStackTrace();
-            System.out.println("Gửi email thất bại!");
         }
-    }
-
-    public static void main(String[] args) {
-        sendEmail("23130130@st.hcmuaf.edu.vn", "Test OTP", "Mã test là: 123456");
     }
 }
