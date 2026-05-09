@@ -1,0 +1,42 @@
+package vn.edu.hcmuaf.fit.controller.admin;
+
+import vn.edu.hcmuaf.fit.dao.AccountDAO;
+import vn.edu.hcmuaf.fit.dao.DashboardDAO;
+import vn.edu.hcmuaf.fit.dao.OrderDAO;
+import vn.edu.hcmuaf.fit.service.CourseService;
+import vn.edu.hcmuaf.fit.service.DocumentService;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet(name = "AdminDashboardController", value = "/admin/overview")
+public class AdminDashboardController extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        int totalCourses = CourseService.getInstance().countTotal();
+        int totalDocuments = DocumentService.getInstance().countTotal();
+        int totalOrders = OrderDAO.getInstance().countTotal();
+        int totalAccounts = new AccountDAO().countTotalAccounts();
+
+        // Get aggregated stats for charts
+        List<String[]> revenueData = DashboardDAO.getInstance().getMonthlyRevenueLast6Months();
+        List<String[]> categoryData = DashboardDAO.getInstance().getProductsCountByCategory();
+
+        request.setAttribute("totalCourses", totalCourses);
+        request.setAttribute("totalDocuments", totalDocuments);
+        request.setAttribute("totalOrders", totalOrders);
+        request.setAttribute("totalAccounts", totalAccounts);
+
+        request.setAttribute("revenueData", revenueData);
+        request.setAttribute("categoryData", categoryData);
+
+        request.getRequestDispatcher("/Admin/overview.jsp").forward(request, response);
+    }
+}
