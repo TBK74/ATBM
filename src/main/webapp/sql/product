@@ -1,0 +1,309 @@
+-- ============================================
+-- DỮ LIỆU MẪU V3 – AN TOÀN KHI CHẠY LẠI
+-- Dùng INSERT IGNORE hoặc kiểm tra trước
+-- Chạy được dù đã chạy bản v1 hoặc v2 trước đó
+-- ============================================
+
+USE atbm;
+
+-- ============================================
+-- DANH MỤC MỚI (IGNORE nếu đã tồn tại)
+-- ============================================
+INSERT IGNORE INTO categories (CategoryID, CategoryName, Description, DisplayOrder, Image)
+VALUES
+(6, 'Bảo mật',            'An ninh mạng, ethical hacking',        6, 'https://picsum.photos/seed/security/400/300'),
+(7, 'Dữ liệu & AI',       'Data Science, Machine Learning, AI',   7, 'https://picsum.photos/seed/aidata/400/300'),
+(8, 'Phát triển bản thân','Kỹ năng mềm, tư duy, năng suất',       8, 'https://picsum.photos/seed/selfdev/400/300');
+
+-- ============================================
+-- CẬP NHẬT ẢNH KHÓA HỌC CŨ (ID 1-4)
+-- UPDATE không gây lỗi dù chạy nhiều lần
+-- ============================================
+UPDATE courses SET ThumbnailUrl = 'https://picsum.photos/seed/javaweb/600/400'    WHERE CourseID = 1;
+UPDATE courses SET ThumbnailUrl = 'https://picsum.photos/seed/reactnode/600/400'  WHERE CourseID = 2;
+UPDATE courses SET ThumbnailUrl = 'https://picsum.photos/seed/uiuxdesign/600/400' WHERE CourseID = 3;
+UPDATE courses SET ThumbnailUrl = 'https://picsum.photos/seed/digimkt/600/400'    WHERE CourseID = 4;
+
+-- ============================================
+-- CẬP NHẬT ẢNH TÀI LIỆU CŨ (ID 1-4)
+-- ============================================
+UPDATE documents SET ThumbnailUrl = 'https://picsum.photos/seed/javadoc/600/400'    WHERE DocumentID = 1;
+UPDATE documents SET ThumbnailUrl = 'https://picsum.photos/seed/springboot/600/400' WHERE DocumentID = 2;
+UPDATE documents SET ThumbnailUrl = 'https://picsum.photos/seed/figmaguide/600/400' WHERE DocumentID = 3;
+UPDATE documents SET ThumbnailUrl = 'https://picsum.photos/seed/seobook/600/400'    WHERE DocumentID = 4;
+
+-- ============================================
+-- XÓA KHÓA HỌC TRÙNG NẾU ĐÃ CHẠY V1 HOẶC V2
+-- (xóa theo Title để tránh trùng lặp)
+-- ============================================
+DELETE FROM courses WHERE Title IN (
+  'Python cho người mới bắt đầu',
+  'Flutter & Dart – Lập trình App Mobile',
+  'Lập trình C# và .NET Core Web API',
+  'DevOps với Docker & Kubernetes',
+  'SQL & Database Design từ A–Z',
+  'Adobe Photoshop từ cơ bản đến chuyên nghiệp',
+  'Motion Design với After Effects',
+  '3D Modeling với Blender',
+  'TikTok Marketing & Xây dựng thương hiệu cá nhân',
+  'Google Ads & Facebook Ads thực chiến',
+  'Khởi nghiệp Startup từ ý tưởng đến MVP',
+  'Tài chính cá nhân & Đầu tư chứng khoán cơ bản',
+  'Ethical Hacking & Penetration Testing',
+  'An ninh mạng cho lập trình viên',
+  'Machine Learning với Python & Scikit-learn',
+  'Power BI – Phân tích dữ liệu & Báo cáo kinh doanh'
+);
+
+-- ============================================
+-- XÓA TÀI LIỆU TRÙNG NẾU ĐÃ CHẠY V1 HOẶC V2
+-- ============================================
+DELETE FROM documents WHERE Title IN (
+  'Clean Code – Nghệ thuật viết code sạch',
+  'Tài liệu Git & GitHub toàn tập',
+  'Giáo trình Cấu trúc dữ liệu & Giải thuật',
+  'Tài liệu Docker từ A–Z',
+  'Cheat Sheet Python – 50 trang',
+  'Figma nâng cao – Component & Auto Layout',
+  'Color Theory & Typography cho Designer',
+  'Portfolio Design – CV & Portfolio nổi bật',
+  'Cẩm nang Content Marketing 2024',
+  'Email Marketing – Tăng tỷ lệ mở & chuyển đổi',
+  'Business Model Canvas – 50 Case Study',
+  'Excel cho Tài chính & Kế toán',
+  'Từ vựng IELTS 4000 từ theo chủ đề',
+  'Ngữ pháp tiếng Anh toàn diện A1–C1',
+  'OWASP Top 10 – Hướng dẫn bảo mật Web App',
+  'Giáo trình Machine Learning cơ bản'
+);
+
+-- ============================================
+-- INSERT KHÓA HỌC MỚI (sạch, không trùng)
+-- ============================================
+INSERT INTO courses
+    (Title, InstructorID, CategoryID, Price, OldPrice, ThumbnailUrl, ShortDesc, Description,
+     Level, Language, DurationHours, Rating, ReviewCount, SoldCount, Badge, IsActive)
+VALUES
+('Python cho người mới bắt đầu',
+ 2, 1, 199000, 399000,
+ 'https://picsum.photos/seed/python101/600/400',
+ 'Học Python từ zero: biến, vòng lặp, hàm, OOP và dự án thực tế.',
+ 'Khóa học Python toàn diện dành cho người mới. Từ cú pháp cơ bản, cấu trúc dữ liệu, OOP đến dự án nhỏ cuối khóa.',
+ 'beginner', 'Tiếng Việt', 18.0, 4.8, 342, 512, 'Bán chạy', 1),
+
+('Flutter & Dart – Lập trình App Mobile',
+ 2, 1, 449000, 749000,
+ 'https://picsum.photos/seed/flutterdart/600/400',
+ 'Xây dựng ứng dụng iOS & Android chuyên nghiệp với Flutter.',
+ 'Từ cài đặt, widgets, state management (Provider, Bloc) đến publish app lên Store. Kèm 3 dự án thực tế.',
+ 'intermediate', 'Tiếng Việt', 40.0, 4.7, 218, 174, 'Hot', 1),
+
+('Lập trình C# và .NET Core Web API',
+ 2, 1, 379000, 599000,
+ 'https://picsum.photos/seed/csharpnet/600/400',
+ 'Xây dựng RESTful API với ASP.NET Core, Entity Framework, JWT.',
+ 'Backend chuyên sâu với C# và .NET Core. Clean Architecture, CQRS, Docker và triển khai Azure.',
+ 'intermediate', 'Tiếng Việt', 32.0, 4.6, 156, 143, NULL, 1),
+
+('DevOps với Docker & Kubernetes',
+ 2, 1, 499000, 799000,
+ 'https://picsum.photos/seed/devopsk8s/600/400',
+ 'CI/CD, container hóa ứng dụng, orchestration với Kubernetes.',
+ 'Docker, Docker Compose, Kubernetes, Helm, GitLab CI/CD, monitoring Prometheus & Grafana.',
+ 'advanced', 'Tiếng Việt', 45.0, 4.9, 98, 87, 'Mới', 1),
+
+('SQL & Database Design từ A–Z',
+ 2, 1, 249000, 449000,
+ 'https://picsum.photos/seed/sqldesign/600/400',
+ 'Thiết kế CSDL, viết SQL nâng cao, tối ưu query.',
+ 'SQL từ cơ bản đến nâng cao: JOIN, subquery, index, stored procedure, trigger. MySQL và PostgreSQL.',
+ 'beginner', 'Tiếng Việt', 22.0, 4.7, 267, 389, 'Bán chạy', 1),
+
+('Adobe Photoshop từ cơ bản đến chuyên nghiệp',
+ 2, 2, 279000, 479000,
+ 'https://picsum.photos/seed/photoshopcc/600/400',
+ 'Chỉnh sửa ảnh, thiết kế poster, banner với Photoshop CC.',
+ 'Photoshop toàn diện: công cụ cơ bản, layer, mask, retouching, compositing và xuất file.',
+ 'beginner', 'Tiếng Việt', 20.0, 4.5, 189, 276, NULL, 1),
+
+('Motion Design với After Effects',
+ 2, 2, 399000, 649000,
+ 'https://picsum.photos/seed/afterfx/600/400',
+ 'Tạo animation, motion graphics chuyên nghiệp với After Effects.',
+ 'Keyframe animation, expressions, compositing và render. Intro video, lower third, infographic động.',
+ 'intermediate', 'Tiếng Việt', 28.0, 4.8, 134, 118, 'Hot', 1),
+
+('3D Modeling với Blender',
+ 2, 2, 329000, 549000,
+ 'https://picsum.photos/seed/blender3d/600/400',
+ 'Học Blender từ đầu: modeling, texturing, rendering, animation.',
+ 'Giao diện, modeling, UV unwrapping, Cycles & EEVEE render, rigging và animation cơ bản.',
+ 'beginner', 'Tiếng Việt', 35.0, 4.6, 112, 94, 'Mới', 1),
+
+('TikTok Marketing & Xây dựng thương hiệu cá nhân',
+ 2, 3, 299000, 499000,
+ 'https://picsum.photos/seed/tiktokads/600/400',
+ 'Chiến lược nội dung TikTok, tăng follower và chuyển đổi doanh thu.',
+ 'Xây dựng kênh TikTok từ 0, kịch bản video viral, chạy TikTok Ads và đo lường hiệu quả.',
+ 'beginner', 'Tiếng Việt', 16.0, 4.7, 203, 318, 'Bán chạy', 1),
+
+('Google Ads & Facebook Ads thực chiến',
+ 2, 3, 379000, 599000,
+ 'https://picsum.photos/seed/googlefbads/600/400',
+ 'Tối ưu ngân sách quảng cáo, tăng ROI với PPC.',
+ 'Google Search Ads, Display, YouTube Ads và Facebook/Instagram Ads. A/B testing và tối ưu chiến dịch.',
+ 'intermediate', 'Tiếng Việt', 25.0, 4.6, 167, 221, NULL, 1),
+
+('Khởi nghiệp Startup từ ý tưởng đến MVP',
+ 2, 4, 449000, 699000,
+ 'https://picsum.photos/seed/startupvn/600/400',
+ 'Xây dựng và validate ý tưởng kinh doanh, gọi vốn đầu tư.',
+ 'Business Model Canvas, Lean Startup đến pitching nhà đầu tư. Case study startup Việt Nam.',
+ 'intermediate', 'Tiếng Việt', 20.0, 4.5, 145, 167, 'Hot', 1),
+
+('Tài chính cá nhân & Đầu tư chứng khoán cơ bản',
+ 2, 4, 299000, 499000,
+ 'https://picsum.photos/seed/financestock/600/400',
+ 'Quản lý tài chính, đầu tư cổ phiếu thông minh cho người mới.',
+ 'Tài chính cơ bản, đọc báo cáo tài chính, phân tích cơ bản & kỹ thuật, xây dựng danh mục.',
+ 'beginner', 'Tiếng Việt', 18.0, 4.8, 289, 345, 'Bán chạy', 1),
+
+('Ethical Hacking & Penetration Testing',
+ 2, 6, 549000, 899000,
+ 'https://picsum.photos/seed/ethicalhack/600/400',
+ 'Kiểm thử xâm nhập, tìm lỗ hổng bảo mật theo chuẩn CEH.',
+ 'Ethical hacking từ reconnaissance, scanning, exploitation đến post-exploitation. Lab Kali Linux.',
+ 'advanced', 'Tiếng Việt', 50.0, 4.9, 76, 58, 'Mới', 1),
+
+('An ninh mạng cho lập trình viên',
+ 2, 6, 329000, 549000,
+ 'https://picsum.photos/seed/websecurity/600/400',
+ 'OWASP Top 10, bảo vệ web app khỏi các lỗ hổng phổ biến.',
+ 'SQL Injection, XSS, CSRF, IDOR, JWT attack. Security best practices vào code hàng ngày.',
+ 'intermediate', 'Tiếng Việt', 24.0, 4.7, 134, 198, NULL, 1),
+
+('Machine Learning với Python & Scikit-learn',
+ 2, 7, 499000, 799000,
+ 'https://picsum.photos/seed/mlpython/600/400',
+ 'Xây dựng mô hình ML: phân loại, hồi quy, clustering.',
+ 'Toán học ML đến implement thuật toán Scikit-learn, xử lý dữ liệu Pandas, trực quan Matplotlib.',
+ 'intermediate', 'Tiếng Việt', 38.0, 4.8, 198, 234, 'Hot', 1),
+
+('Power BI – Phân tích dữ liệu & Báo cáo kinh doanh',
+ 2, 7, 349000, 599000,
+ 'https://picsum.photos/seed/powerbivn/600/400',
+ 'Tạo dashboard tương tác, báo cáo chuyên nghiệp với Power BI.',
+ 'Kết nối nguồn dữ liệu, Power Query ETL, DAX, xây dựng dashboard và publish Power BI Service.',
+ 'beginner', 'Tiếng Việt', 22.0, 4.6, 167, 289, 'Bán chạy', 1);
+
+-- ============================================
+-- INSERT TÀI LIỆU MỚI (sạch, không trùng)
+-- ============================================
+INSERT INTO documents
+    (Title, Author, CategoryID, Price, OldPrice, ThumbnailUrl, Description,
+     FilePath, FileType, PageCount, FileSizeKb, Rating, ReviewCount, SoldCount, Badge, IsActive)
+VALUES
+('Clean Code – Nghệ thuật viết code sạch',
+ 'Robert C. Martin (Dịch: Nguyễn Minh Tuấn)', 1, 89000, 169000,
+ 'https://picsum.photos/seed/cleancode/600/400',
+ 'Tóm lược và ví dụ thực tế từ cuốn sách kinh điển Clean Code. Áp dụng vào Java, Python, C#.',
+ '/uploads/docs/clean-code-vi.pdf', 'PDF', 180, 4608, 4.9, 312, 478, 'Bán chạy', 1),
+
+('Tài liệu Git & GitHub toàn tập',
+ 'Phạm Hữu Khánh', 1, 39000, 79000,
+ 'https://picsum.photos/seed/gitguide/600/400',
+ 'Từ git init đến gitflow, pull request, CI/CD GitHub Actions. Kèm cheat sheet và bài tập.',
+ '/uploads/docs/git-github-toan-tap.pdf', 'PDF', 140, 3072, 4.7, 234, 567, 'Bán chạy', 1),
+
+('Giáo trình Cấu trúc dữ liệu & Giải thuật',
+ 'Nguyễn Thị Lan Hương', 1, 69000, 129000,
+ 'https://picsum.photos/seed/dsa2024/600/400',
+ 'Array, Linked List, Stack, Queue, Tree, Graph, Sorting, Searching. Code Python và Java.',
+ '/uploads/docs/ctdl-giai-thuat.pdf', 'PDF', 320, 7168, 4.8, 198, 312, NULL, 1),
+
+('Tài liệu Docker từ A–Z',
+ 'Lê Quang Vinh', 1, 59000, 99000,
+ 'https://picsum.photos/seed/dockeraz/600/400',
+ 'Dockerfile, docker-compose, networking, volume, security và deploy production. 10 lab thực hành.',
+ '/uploads/docs/docker-az.pdf', 'PDF', 200, 5120, 4.6, 145, 198, 'Mới', 1),
+
+('Cheat Sheet Python – 50 trang',
+ 'Trần Đức Anh', 1, 29000, 49000,
+ 'https://picsum.photos/seed/pycheat/600/400',
+ 'Tổng hợp cú pháp, thư viện và tips Python thường dùng nhất. In ra dán bàn làm việc.',
+ '/uploads/docs/python-cheatsheet.pdf', 'PDF', 50, 1024, 4.5, 289, 634, 'Hot', 1),
+
+('Figma nâng cao – Component & Auto Layout',
+ 'Nguyễn Bảo Châu', 2, 59000, 109000,
+ 'https://picsum.photos/seed/figmaadv/600/400',
+ 'Xây dựng Design System, Variant, Prototyping và Handoff cho developer với Figma.',
+ '/uploads/docs/figma-nang-cao.pdf', 'PDF', 160, 6144, 4.8, 167, 234, 'Mới', 1),
+
+('Color Theory & Typography cho Designer',
+ 'Phạm Thùy Linh', 2, 49000, 89000,
+ 'https://picsum.photos/seed/colortype/600/400',
+ 'Lý thuyết màu sắc, phối màu, chọn font và xây dựng typescale cho dự án thực tế.',
+ '/uploads/docs/color-typography.pdf', 'PDF', 110, 4096, 4.7, 134, 198, NULL, 1),
+
+('Portfolio Design – CV & Portfolio nổi bật',
+ 'Hoàng Minh Đức', 2, 39000, 69000,
+ 'https://picsum.photos/seed/portfoliodsg/600/400',
+ 'Xây dựng portfolio chuyên nghiệp cho Designer, bao gồm template có thể chỉnh sửa.',
+ '/uploads/docs/portfolio-design.pdf', 'PDF', 80, 2048, 4.6, 98, 312, 'Hot', 1),
+
+('Cẩm nang Content Marketing 2024',
+ 'Vũ Thị Hoa', 3, 79000, 149000,
+ 'https://picsum.photos/seed/contentmkt/600/400',
+ 'Chiến lược nội dung, content calendar, copywriting AIDA và đo lường KPI. 30 template.',
+ '/uploads/docs/content-marketing-2024.pdf', 'PDF', 220, 5632, 4.7, 178, 267, 'Bán chạy', 1),
+
+('Email Marketing – Tăng tỷ lệ mở & chuyển đổi',
+ 'Đặng Quốc Hùng', 3, 59000, 109000,
+ 'https://picsum.photos/seed/emailmkt/600/400',
+ 'Xây dựng danh sách email, phân khúc, A/B test subject line và tối ưu deliverability.',
+ '/uploads/docs/email-marketing.pdf', 'PDF', 150, 3584, 4.5, 134, 189, NULL, 1),
+
+('Business Model Canvas – 50 Case Study',
+ 'Lê Văn Trường', 4, 99000, 199000,
+ 'https://picsum.photos/seed/bmccase/600/400',
+ 'Phân tích mô hình kinh doanh của 50 công ty: Apple, Grab, Tiki, Vinamilk…',
+ '/uploads/docs/bmc-50-case-study.pdf', 'PDF', 280, 8192, 4.9, 234, 312, 'Hot', 1),
+
+('Excel cho Tài chính & Kế toán',
+ 'Nguyễn Thị Mai', 4, 69000, 129000,
+ 'https://picsum.photos/seed/excelfin/600/400',
+ 'Hàm tài chính, PivotTable, biểu đồ, VBA cơ bản và mẫu báo cáo tài chính.',
+ '/uploads/docs/excel-tai-chinh.pdf', 'PDF', 200, 4608, 4.6, 167, 245, 'Bán chạy', 1),
+
+('Từ vựng IELTS 4000 từ theo chủ đề',
+ 'Trần Ngọc Ánh', 5, 79000, 149000,
+ 'https://picsum.photos/seed/ielts4k/600/400',
+ '4000 từ vựng IELTS phân loại theo 20 chủ đề, kèm ví dụ câu và audio QR code.',
+ '/uploads/docs/ielts-4000-tu-vung.pdf', 'PDF', 350, 9216, 4.8, 312, 489, 'Bán chạy', 1),
+
+('Ngữ pháp tiếng Anh toàn diện A1–C1',
+ 'Phạm Quang Dũng', 5, 89000, 169000,
+ 'https://picsum.photos/seed/enggrammar/600/400',
+ 'Ngữ pháp tiếng Anh từ cơ bản đến nâng cao, bài tập có đáp án và bảng tóm tắt.',
+ '/uploads/docs/ngu-phap-anh-toan-dien.pdf', 'PDF', 400, 10240, 4.7, 267, 378, NULL, 1),
+
+('OWASP Top 10 – Hướng dẫn bảo mật Web App',
+ 'Nguyễn Anh Khoa', 6, 69000, 119000,
+ 'https://picsum.photos/seed/owasptop/600/400',
+ '10 lỗ hổng bảo mật phổ biến nhất, cách khai thác và cách phòng chống chi tiết.',
+ '/uploads/docs/owasp-top10.pdf', 'PDF', 170, 4096, 4.9, 145, 223, 'Mới', 1),
+
+('Giáo trình Machine Learning cơ bản',
+ 'Vũ Hữu Tiệp', 7, 99000, 199000,
+ 'https://picsum.photos/seed/mlbasic/600/400',
+ 'Toán học ML, các thuật toán cổ điển và deep learning nhập môn. Chuẩn giáo trình đại học.',
+ '/uploads/docs/machine-learning-co-ban.pdf', 'PDF', 480, 12288, 4.9, 289, 412, 'Bán chạy', 1);
+
+-- ============================================
+-- MÃ KHUYẾN MÃI (IGNORE nếu đã tồn tại)
+-- ============================================
+INSERT IGNORE INTO promo_codes (Code, Type, Amount, MinOrderValue, UsageLimit, IsActive, AppliesTo)
+VALUES
+('NEWBIE20', 'percent', 20.00, 0,      200, 1, 'all'),
+('GIAM100K', 'fixed',  100000, 500000,  50, 1, 'all'),
+('SALE15',   'percent', 15.00, 150000,   0, 1, 'all');
