@@ -32,7 +32,7 @@
                             <c:when test="${sessionScope.auth != null}">
                                 <a class="account-link" href="${pageContext.request.contextPath}/update-profile">
                                     <i class="fa-solid fa-user"></i>
-                                    ${sessionScope.auth.username}
+                                        ${sessionScope.auth.username}
                                 </a>
                             </c:when>
                             <c:otherwise>

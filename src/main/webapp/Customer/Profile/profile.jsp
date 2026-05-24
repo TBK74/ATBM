@@ -334,20 +334,24 @@
                                                                                                                         for
                                                                                                                         Admin)
                                                                                                                         --%>
-                                                                                                                        <c:if
-                                                                                                                            test="${user.role == 'Admin' || user.role == 'Manager'}">
-                                                                                                                            <div
-                                                                                                                                style="margin-top: 15px;">
-                                                                                                                                <a href="${pageContext.request.contextPath}/admin/overview"
-                                                                                                                                    style="display: inline-block; background-color: #cc2121; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-family: sans-serif;">
-                                                                                                                                    <i
-                                                                                                                                        class="fa fa-user-shield"></i>
-                                                                                                                                    Trang
-                                                                                                                                    Quản
-                                                                                                                                    Trị
-                                                                                                                                </a>
-                                                                                                                            </div>
-                                                                                                                        </c:if>
+                                                                                                                    <%-- BANNER TRANG QUẢN TRỊ --%>
+                                                                                                                    <c:if test="${fn:toLowerCase(user.role) == 'admin' || fn:toLowerCase(user.role) == 'manager'}">
+                                                                                                                        <div style="margin: 0 0 18px 0; padding: 14px 20px; background: linear-gradient(135deg,#b91c1c,#991b1b); border-radius: 8px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(185,28,28,.3);">
+                                                                    <span style="color:#fff; font-size:14px; font-weight:600;">
+                                                                        <i class="fa-solid fa-user-shield"
+                                                                           style="margin-right:8px;"></i>
+                                                                        Bạn đang đăng nhập với quyền <strong>${fn:toUpperCase(user.role)}</strong>
+                                                                    </span>
+                                                                                                                            <a href="${pageContext.request.contextPath}/admin/overview"
+                                                                                                                               style="display:inline-flex; align-items:center; gap:6px; background:#fff; color:#b91c1c; padding:8px 16px; text-decoration:none; border-radius:6px; font-weight:700; font-size:13px; white-space:nowrap;">
+                                                                                                                                <i class="fa-solid fa-gauge-high"></i>
+                                                                                                                                Vào
+                                                                                                                                Trang
+                                                                                                                                Quản
+                                                                                                                                Trị
+                                                                                                                            </a>
+                                                                                                                        </div>
+                                                                                                                    </c:if>
                                                                                                             </div>
 
                                                                                                             <div
