@@ -74,4 +74,13 @@ public class CustomerDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
+
+    public boolean createCustomerRecord(int accountId) {
+        String query = "INSERT IGNORE INTO customers (AccountID) VALUES (?)";
+        try (Connection conn = DBConnect.get(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, accountId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
 }

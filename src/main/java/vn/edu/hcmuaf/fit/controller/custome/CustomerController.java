@@ -16,6 +16,7 @@ public class CustomerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("auth");
 
@@ -24,6 +25,12 @@ public class CustomerController extends HttpServlet {
             return;
         }
 
+        CustomerService.getInstance().ensureCustomerRecord(user.getAccountID());
+
+        Customer customer = CustomerService.getInstance().getCustomerByAccountId(user.getAccountID());
+        session.setAttribute("customer", customer);
+
+        request.setAttribute("user", user);
         request.getRequestDispatcher("/Customer/Profile/profile.jsp").forward(request, response);
     }
 
@@ -42,17 +49,18 @@ public class CustomerController extends HttpServlet {
             return;
         }
 
-        String fullName = request.getParameter("fullName");
+        CustomerService.getInstance().ensureCustomerRecord(user.getAccountID());
+
         String phone = request.getParameter("phone");
 
-        // Cho phép cập nhật từng trường riêng lẻ — không bắt buộc điền đủ tất cả.
-        // Chỉ validate trường nào người dùng thực sự điền.
         if (phone != null && !phone.isBlank() && !phone.matches("\\d{10,11}")) {
             request.setAttribute("error", "Số điện thoại không hợp lệ (phải là 10-11 số)!");
+            request.setAttribute("user", user);
             request.getRequestDispatcher("/Customer/Profile/profile.jsp").forward(request, response);
             return;
         }
 
+        String fullName = request.getParameter("fullName");
         boolean isUpdated = CustomerService.getInstance().updateCustomerInfo(
                 user.getAccountID(), fullName, phone);
 
@@ -64,6 +72,7 @@ public class CustomerController extends HttpServlet {
             request.setAttribute("error", "Cập nhật thất bại. Vui lòng thử lại!");
         }
 
+        request.setAttribute("user", user);
         request.getRequestDispatcher("/Customer/Profile/profile.jsp").forward(request, response);
     }
 }

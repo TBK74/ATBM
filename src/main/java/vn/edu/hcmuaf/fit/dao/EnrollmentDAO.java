@@ -23,10 +23,23 @@ public class EnrollmentDAO {
     }
 
     public boolean isEnrolled(int customerId, int courseId) {
-        String sql = "SELECT COUNT(*) FROM enrollments WHERE CustomerID=? AND CourseID=?";
+        String sql = "SELECT COUNT(*) FROM enrollments e " +
+                "LEFT JOIN orders o ON e.OrderID = o.OrderID " +
+                "WHERE e.CustomerID=? AND e.CourseID=? " +
+                "AND (o.OrderID IS NULL OR o.Status != 'Cancelled')";
         try (Connection conn = DBConnect.get(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerId); ps.setInt(2, courseId);
             try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getInt(1) > 0; }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean revokeEnrollmentByOrder(int orderId) {
+        String sql = "DELETE FROM enrollments WHERE OrderID=?";
+        try (Connection conn = DBConnect.get(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.executeUpdate();
+            return true;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
