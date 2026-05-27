@@ -9,6 +9,7 @@ import vn.edu.hcmuaf.fit.model.*;
 import vn.edu.hcmuaf.fit.service.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "CourseDetailServlet", value = "/course-detail")
 public class CourseDetailServlet extends HttpServlet {
@@ -24,6 +25,12 @@ public class CourseDetailServlet extends HttpServlet {
             req.setAttribute("course", course);
             req.setAttribute("relatedCourses", CourseService.getInstance().getRelated(id, course.getCategoryId(), 4));
 
+            // Reviews — reuse ReviewService; productId maps to course id in review table
+            ReviewService reviewService = ReviewService.getInstance();
+            List<?> reviews = reviewService.getReviewsByProductId(id);
+            req.setAttribute("reviews", reviews);
+            req.setAttribute("reviewCount", reviews.size());
+
             HttpSession session = req.getSession();
             User user = (User) session.getAttribute("auth");
             if (user != null) {
@@ -31,6 +38,10 @@ public class CourseDetailServlet extends HttpServlet {
                 req.setAttribute("isEnrolled", EnrollmentDAO.getInstance().isEnrolled(cid, id));
                 Cart cart = CartService.getInstance().getCart(cid);
                 req.setAttribute("inCart", cart.contains("course", id));
+                req.setAttribute("canReview", reviewService.canCustomerReview(cid, id));
+                // reviews-section.jsp uses ${product.id} and ${product.rating} - set a proxy
+                req.setAttribute("product", course);
+                req.setAttribute("auth", user);
             }
             req.getRequestDispatcher("/Courses/course-detail.jsp").forward(req, resp);
         } catch (NumberFormatException e) { resp.sendRedirect("courses"); }
