@@ -33,6 +33,8 @@
                         <a class="menu-item" href="categories">Danh mục</a>
                         <a class="menu-item" href="promocodes">Khuyến mãi</a>
                         <a class="menu-item active" href="orders">Đơn hàng</a>
+                        <a class="menu-item" href="edit-requests">Yêu cầu chỉnh sửa</a>
+                        <a class="menu-item" href="alerts">Cảnh báo</a>
                     </nav>
                     <div class="sidebar-logout">
                         <a class="logout-btn" href="${pageContext.request.contextPath}/logout"
@@ -78,6 +80,13 @@
                         </form>
                     </section>
 
+                    <c:if test="${not empty orderError}">
+                        <div style="background:#fff0f0; border:1px solid #f5c6cb; color:#721c24;
+                 padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> ${orderError}
+                        </div>
+                    </c:if>
+
                     <!-- BẢNG ĐƠN HÀNG -->
                     <section class="card">
                         <div class="table-wrap">
@@ -112,6 +121,7 @@
                                             <td style="display:flex;gap:6px;flex-wrap:wrap;">
                                                 <c:if test="${o.status == 'Pending'}">
                                                     <form action="orders" method="post" style="display:inline;">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Processing">
@@ -120,6 +130,7 @@
                                                 </c:if>
                                                 <c:if test="${o.status == 'Processing'}">
                                                     <form action="orders" method="post" style="display:inline;">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Completed">
@@ -128,6 +139,7 @@
                                                 </c:if>
                                                 <c:if test="${o.status == 'Pending' || o.status == 'Processing'}">
                                                     <form action="orders" method="post" style="display:inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Cancelled">
