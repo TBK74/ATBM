@@ -22,28 +22,28 @@ public class ReviewDAO {
     }
 
     /**
-     * Lấy tất cả review của một sản phẩm
+     * Lấy tất cả review của một tài liệu (document)
      */
     public List<Review> getReviewsByProductId(int productId) {
         List<Review> reviews = new ArrayList<>();
         String query = "SELECT r.*, c.FullName as CustomerName " +
-                      "FROM reviews r " +
-                      "JOIN customers c ON r.CustomerID = c.CustomerID " +
-                      "WHERE r.ProductID = ? " +
-                      "ORDER BY r.ReviewDate DESC";
-        
+                "FROM reviews r " +
+                "JOIN customers c ON r.CustomerID = c.CustomerID " +
+                "WHERE r.ItemType = 'document' AND r.ItemID = ? " +
+                "ORDER BY r.CreatedAt DESC";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Review review = new Review(
-                        rs.getInt("ReviewID"),
-                        rs.getInt("ProductID"),
-                        rs.getInt("CustomerID"),
-                        rs.getInt("Rating"),
-                        rs.getString("Content"),
-                        rs.getTimestamp("ReviewDate")
+                            rs.getInt("ReviewID"),
+                            rs.getInt("ItemID"),
+                            rs.getInt("CustomerID"),
+                            rs.getInt("Rating"),
+                            rs.getString("Content"),
+                            rs.getTimestamp("CreatedAt")
                     );
                     review.setCustomerName(rs.getString("CustomerName"));
                     reviews.add(review);
@@ -61,10 +61,10 @@ public class ReviewDAO {
      */
     public boolean hasCustomerPurchasedProduct(int customerId, int productId) {
         String query = "SELECT COUNT(*) FROM orders o " +
-                      "JOIN orderitems oi ON o.OrderID = oi.OrderID " +
-                      "WHERE o.CustomerID = ? AND oi.ProductID = ? " +
-                      "AND o.Status = 'Completed'";
-        
+                "JOIN orderitems oi ON o.OrderID = oi.OrderID " +
+                "WHERE o.CustomerID = ? AND oi.ItemType = 'document' AND oi.ItemID = ? " +
+                "AND o.Status = 'Completed'";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, customerId);
@@ -85,8 +85,8 @@ public class ReviewDAO {
      */
     public boolean hasCustomerReviewedProduct(int customerId, int productId) {
         String query = "SELECT COUNT(*) FROM reviews " +
-                      "WHERE CustomerID = ? AND ProductID = ?";
-        
+                "WHERE CustomerID = ? AND ItemType = 'document' AND ItemID = ?";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, customerId);
@@ -106,27 +106,27 @@ public class ReviewDAO {
      * Thêm review mới
      */
     public boolean addReview(Review review) {
-        String query = "INSERT INTO reviews (ProductID, CustomerID, Rating, Content) " +
-                      "VALUES (?, ?, ?, ?)";
-        
+        if (review.getRating() == null) {
+            // Cột Rating trong bảng reviews là NOT NULL — không cho insert thiếu rating
+            return false;
+        }
+        String query = "INSERT INTO reviews (ItemType, ItemID, CustomerID, Rating, Content) " +
+                "VALUES ('document', ?, ?, ?, ?)";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, review.getProductId());
             ps.setInt(2, review.getCustomerId());
-            if (review.getRating() != null) {
-                ps.setInt(3, review.getRating());
-            } else {
-                ps.setNull(3, Types.INTEGER);
-            }
+            ps.setInt(3, review.getRating());
             ps.setString(4, review.getContent());
-            
+
             int result = ps.executeUpdate();
-            
-            // Cập nhật rating và review count của sản phẩm
+
+            // Cập nhật rating và review count của tài liệu
             if (result > 0) {
                 updateProductRating(review.getProductId());
             }
-            
+
             return result > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -138,11 +138,11 @@ public class ReviewDAO {
      * Cập nhật rating trung bình và số lượng review của sản phẩm
      */
     private void updateProductRating(int productId) {
-        String query = "UPDATE products SET " +
-                      "Rating = (SELECT AVG(Rating) FROM reviews WHERE ProductID = ? AND Rating IS NOT NULL), " +
-                      "ReviewCount = (SELECT COUNT(*) FROM reviews WHERE ProductID = ?) " +
-                      "WHERE ProductID = ?";
-        
+        String query = "UPDATE documents SET " +
+                "Rating = (SELECT AVG(Rating) FROM reviews WHERE ItemType='document' AND ItemID = ?), " +
+                "ReviewCount = (SELECT COUNT(*) FROM reviews WHERE ItemType='document' AND ItemID = ?) " +
+                "WHERE DocumentID = ?";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, productId);
@@ -159,14 +159,14 @@ public class ReviewDAO {
      */
     public boolean deleteReview(int reviewId, int customerId) {
         String query = "DELETE FROM reviews WHERE ReviewID = ? AND CustomerID = ?";
-        
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, reviewId);
             ps.setInt(2, customerId);
-            
+
             int result = ps.executeUpdate();
-            
+
             // Cập nhật lại rating của sản phẩm
             if (result > 0) {
                 Review review = getReviewById(reviewId);
@@ -174,7 +174,7 @@ public class ReviewDAO {
                     updateProductRating(review.getProductId());
                 }
             }
-            
+
             return result > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -187,19 +187,19 @@ public class ReviewDAO {
      */
     public Review getReviewById(int reviewId) {
         String query = "SELECT * FROM reviews WHERE ReviewID = ?";
-        
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, reviewId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Review(
-                        rs.getInt("ReviewID"),
-                        rs.getInt("ProductID"),
-                        rs.getInt("CustomerID"),
-                        rs.getInt("Rating"),
-                        rs.getString("Content"),
-                        rs.getTimestamp("ReviewDate")
+                            rs.getInt("ReviewID"),
+                            rs.getInt("ItemID"),
+                            rs.getInt("CustomerID"),
+                            rs.getInt("Rating"),
+                            rs.getString("Content"),
+                            rs.getTimestamp("CreatedAt")
                     );
                 }
             }
@@ -214,24 +214,24 @@ public class ReviewDAO {
      */
     public List<Review> getReviewsByCustomerId(int customerId) {
         List<Review> reviews = new ArrayList<>();
-        String query = "SELECT r.*, p.ProductName " +
-                      "FROM reviews r " +
-                      "JOIN products p ON r.ProductID = p.ProductID " +
-                      "WHERE r.CustomerID = ? " +
-                      "ORDER BY r.ReviewDate DESC";
-        
+        String query = "SELECT r.*, d.Title as ProductName " +
+                "FROM reviews r " +
+                "JOIN documents d ON r.ItemType = 'document' AND r.ItemID = d.DocumentID " +
+                "WHERE r.CustomerID = ? " +
+                "ORDER BY r.CreatedAt DESC";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, customerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Review review = new Review(
-                        rs.getInt("ReviewID"),
-                        rs.getInt("ProductID"),
-                        rs.getInt("CustomerID"),
-                        rs.getInt("Rating"),
-                        rs.getString("Content"),
-                        rs.getTimestamp("ReviewDate")
+                            rs.getInt("ReviewID"),
+                            rs.getInt("ItemID"),
+                            rs.getInt("CustomerID"),
+                            rs.getInt("Rating"),
+                            rs.getString("Content"),
+                            rs.getTimestamp("CreatedAt")
                     );
                     review.setProductName(rs.getString("ProductName"));
                     reviews.add(review);
@@ -247,8 +247,8 @@ public class ReviewDAO {
      * Đếm số review của sản phẩm
      */
     public int countReviewsByProductId(int productId) {
-        String query = "SELECT COUNT(*) FROM reviews WHERE ProductID = ?";
-        
+        String query = "SELECT COUNT(*) FROM reviews WHERE ItemType = 'document' AND ItemID = ?";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, productId);
@@ -267,8 +267,8 @@ public class ReviewDAO {
      * Lấy rating trung bình của sản phẩm
      */
     public double getAverageRating(int productId) {
-        String query = "SELECT AVG(Rating) FROM reviews WHERE ProductID = ? AND Rating IS NOT NULL";
-        
+        String query = "SELECT AVG(Rating) FROM reviews WHERE ItemType = 'document' AND ItemID = ?";
+
         try (Connection conn = DBConnect.get();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, productId);
