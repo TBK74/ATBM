@@ -4,6 +4,7 @@ import vn.edu.hcmuaf.fit.dao.OrderDAO;
 import vn.edu.hcmuaf.fit.model.Order;
 import vn.edu.hcmuaf.fit.dao.DocumentAccessDAO;
 import vn.edu.hcmuaf.fit.dao.EnrollmentDAO;
+import vn.edu.hcmuaf.fit.service.AuditService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -36,6 +37,12 @@ public class AdminOrderController extends HttpServlet {
         list = hasFilter
                 ? dao.filter(q, status, dateFrom, dateTo, priceMin, priceMax)
                 : dao.getAll();
+
+        String orderError = (String) request.getSession().getAttribute("orderError");
+        if (orderError != null) {
+            request.setAttribute("orderError", orderError);
+            request.getSession().removeAttribute("orderError");
+        }
 
         request.setAttribute("listO",        list);
         request.setAttribute("msgName",      q);
@@ -71,8 +78,25 @@ public class AdminOrderController extends HttpServlet {
     private void handleUpdateStatus(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        int orderId = Integer.parseInt(request.getParameter("id"));
+        int    orderId   = Integer.parseInt(request.getParameter("id"));
         String newStatus = request.getParameter("status");
+
+        int actorAccountId = 0;
+        try {
+            Object auth = request.getSession().getAttribute("auth");
+            if (auth != null) {
+                actorAccountId = (int) auth.getClass().getMethod("getAccountId").invoke(auth);
+            }
+        } catch (Exception ignored) {}
+
+        AuditService.EditCheckResult check =
+                AuditService.getInstance().beforeAdminEdit(orderId, actorAccountId, newStatus);
+
+        if (check.isBlocked()) {
+            request.getSession().setAttribute("orderError", check.getMessage());
+            response.sendRedirect("orders");
+            return;
+        }
 
         Order order = OrderDAO.getInstance().getById(orderId);
         if (order == null) {

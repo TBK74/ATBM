@@ -1,0 +1,89 @@
+-- ============================================================
+-- PERSON C — V3 Migration
+-- Bảng: order_audit_log, admin_alerts, order_edit_requests
+-- ============================================================
+
+-- 1. Log mọi thao tác thay đổi đơn hàng (ai, khi nào, hash trước/sau)
+CREATE TABLE IF NOT EXISTS order_audit_log (
+    log_id          INT AUTO_INCREMENT PRIMARY KEY,
+    order_id        INT            NOT NULL,
+    action          VARCHAR(50)    NOT NULL,  -- 'status_change','edit_attempt','signature_mismatch','key_revoke_scan'
+    actor_account   INT            NULL,       -- NULL nếu do hệ thống tự động
+    old_value       TEXT           NULL,       -- JSON hoặc chuỗi giá trị cũ
+    new_value       TEXT           NULL,       -- JSON hoặc chuỗi giá trị mới
+    hash_before     VARCHAR(512)   NULL,       -- hash chữ ký trước khi thao tác
+    hash_after      VARCHAR(512)   NULL,       -- hash chữ ký sau khi thao tác
+    note            TEXT           NULL,
+    created_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id)      REFERENCES orders(OrderID)      ON DELETE CASCADE,
+    FOREIGN KEY (actor_account) REFERENCES accounts(AccountID)  ON DELETE SET NULL,
+    INDEX idx_audit_order (order_id),
+    INDEX idx_audit_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Cảnh báo gửi tới admin (hiển thị trong trang admin_alerts.jsp)
+CREATE TABLE IF NOT EXISTS admin_alerts (
+    alert_id        INT AUTO_INCREMENT PRIMARY KEY,
+    alert_type      VARCHAR(50)    NOT NULL,  -- 'signature_mismatch','key_revoked_orders','edit_blocked'
+    severity        ENUM('info','warning','critical') NOT NULL DEFAULT 'warning',
+    order_id        INT            NULL,
+    message         TEXT           NOT NULL,
+    is_read         TINYINT(1)     NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolved_at     TIMESTAMP      NULL,
+    resolved_by     INT            NULL,
+    FOREIGN KEY (order_id)    REFERENCES orders(OrderID)     ON DELETE SET NULL,
+    FOREIGN KEY (resolved_by) REFERENCES accounts(AccountID) ON DELETE SET NULL,
+    INDEX idx_alert_read (is_read),
+    INDEX idx_alert_type (alert_type),
+    INDEX idx_alert_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Yêu cầu chỉnh sửa đơn hàng đã có chữ ký (cần admin/customer xác nhận lại)
+CREATE TABLE IF NOT EXISTS order_edit_requests (
+    request_id      INT AUTO_INCREMENT PRIMARY KEY,
+    order_id        INT            NOT NULL,
+    requested_by    INT            NOT NULL,   -- AccountID của admin đề xuất sửa
+    change_summary  TEXT           NOT NULL,   -- Mô tả nội dung cần thay đổi
+    old_status      VARCHAR(30)    NULL,
+    new_status      VARCHAR(30)    NULL,
+    status          ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    created_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at     TIMESTAMP      NULL,
+    reviewed_by     INT            NULL,
+    reject_reason   TEXT           NULL,
+    FOREIGN KEY (order_id)     REFERENCES orders(OrderID)      ON DELETE CASCADE,
+    FOREIGN KEY (requested_by) REFERENCES accounts(AccountID)  ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by)  REFERENCES accounts(AccountID)  ON DELETE SET NULL,
+    INDEX idx_editreq_order  (order_id),
+    INDEX idx_editreq_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Migration: Tạo bảng order_edit_requests (luồng đúng)
+-- Admin tạo yêu cầu → User ký xác nhận → Admin áp dụng
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS order_edit_requests (
+    request_id    INT AUTO_INCREMENT PRIMARY KEY,
+    order_id      INT          NOT NULL,
+    customer_id   INT          NOT NULL,          -- user cần ký xác nhận
+    requested_by  INT          NOT NULL,          -- admin tạo yêu cầu
+    change_summary VARCHAR(500) NOT NULL,
+    old_status    VARCHAR(50),
+    new_status    VARCHAR(50),
+    status        VARCHAR(20)  NOT NULL DEFAULT 'waiting_user',
+    -- waiting_user  → chờ user ký xác nhận
+    -- user_confirmed → user đã ký lại, chờ admin áp dụng
+    -- applied       → admin đã áp dụng thay đổi
+    -- rejected_by_user → user từ chối
+    user_signature  TEXT NULL,    -- chữ ký Base64 của user khi xác nhận
+    user_key_id     INT  NULL,    -- key user dùng để ký
+    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at  TIMESTAMP    NULL,
+    applied_at    TIMESTAMP    NULL,
+    reject_reason VARCHAR(500) NULL,
+    FOREIGN KEY (order_id)     REFERENCES orders (OrderID)      ON DELETE CASCADE,
+    FOREIGN KEY (customer_id)  REFERENCES customers (CustomerID) ON DELETE CASCADE,
+    FOREIGN KEY (requested_by) REFERENCES accounts (AccountID)
+);
