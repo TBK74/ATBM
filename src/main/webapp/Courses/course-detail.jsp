@@ -7,273 +7,217 @@
     <meta charset="utf-8" />
     <title>${course.title} | EDUMART</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Product_Detail/CSS/ProductDetail.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Home/Product/HomeProduct.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Product_Detail/CSS/view.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Product_Detail/CSS/inforProduct.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/footer/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/style/header/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/footer/footer.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/detail-page.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Home/Product/HomeProduct.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .toast {
-            padding: 12px 20px;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
-            min-width: 250px;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
-            animation: slideIn .3s ease, fadeOut .5s ease 2.5s forwards;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .toast.success { background: #28a745; }
-        .toast.error   { background: #dc3545; }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(100%); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to   { opacity: 0; pointer-events: none; }
-        }
-        .toggle-btn-wrap { text-align: center; margin-top: 12px; }
-        .toggle-btn {
-            background: none;
-            border: 1px solid #2563b8;
-            color: #2563b8;
-            border-radius: 6px;
-            padding: 6px 18px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background .15s;
-        }
-        .toggle-btn:hover { background: #eff7ff; }
-        .collapse-wrap { max-height: 300px; overflow: hidden; transition: max-height .3s ease; }
-        .collapse-wrap.expanded { max-height: none; }
-    </style>
 </head>
 <body>
-<div id="toast-container"></div>
+<div id="dp-toast-container"></div>
 <jsp:include page="/style/header/header.jsp" />
 
-<div class="container">
-    <div class="product">
-        <div class="product-gallery" id="gallery">
-            <div class="main-image" aria-live="polite">
-                <img id="mainImg" src="${course.thumbnailUrl}" alt="${course.title}">
+<div class="dp-page">
+    <div class="dp-grid">
+
+        <div class="dp-left">
+
+            <div class="dp-thumb">
+                <img src="${course.thumbnailUrl}" alt="${course.title}">
+            </div>
+
+            <div class="dp-desc-card">
+                <h3><i class="fa-solid fa-align-left"></i> Mô tả khóa học</h3>
+                <div id="descWrap" class="collapse-wrap">
+                    <c:choose>
+                        <c:when test="${not empty course.description}">${course.description}</c:when>
+                        <c:otherwise><p style="color:#999;">Chưa có mô tả.</p></c:otherwise>
+                    </c:choose>
+                </div>
+                <div class="toggle-btn-wrap">
+                    <button id="toggleDesc" class="toggle-btn">Xem tất cả ▼</button>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="dp-reviews">
+                <jsp:include page="/Product_Detail/reviews-section.jsp" />
             </div>
         </div>
 
-        <div class="detail">
-            <section id="product-panel" class="product-panel">
-                <h1 class="prod-title">${course.title}</h1>
-                <p style="color:#666;margin-top:6px;">${course.shortDesc}</p>
-                <div class="divider"></div>
+        <div class="dp-right">
 
-                <div class="price-wrap">
-                    <div class="price-new" id="price-new">
-                        <c:choose>
-                            <c:when test="${course.price == 0}">Miễn phí</c:when>
-                            <c:otherwise>
-                                <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="đ" />
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                    <c:if test="${course.oldPrice > course.price}">
-                        <div class="price-old" id="price-old">
-                            <fmt:formatNumber value="${course.oldPrice}" type="currency" currencySymbol="đ" />
-                        </div>
-                        <div class="price-off" id="price-off">
-                            -<fmt:formatNumber value="${(1 - course.price / course.oldPrice) * 100}" maxFractionDigits="0" />%
-                        </div>
-                    </c:if>
+            <div class="dp-panel">
+                <h1>${course.title}</h1>
+                <p class="dp-subtitle">${course.shortDesc}</p>
+                <hr class="dp-divider">
+
+                <!-- Giá -->
+                <div class="dp-price-wrap">
+                    <c:choose>
+                        <c:when test="${course.price == 0}">
+                            <span class="dp-price-free"><i class="fa-solid fa-gift"></i> Miễn phí</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="dp-price-new">
+                                <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="₫"/>
+                            </span>
+                            <c:if test="${course.oldPrice > course.price}">
+                                <span class="dp-price-old">
+                                    <fmt:formatNumber value="${course.oldPrice}" type="currency" currencySymbol="₫"/>
+                                </span>
+                                <span class="dp-price-off">
+                                    -<fmt:formatNumber value="${(1 - course.price / course.oldPrice) * 100}" maxFractionDigits="0"/>%
+                                </span>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
-                <div class="grid">
-                    <div class="label">Giảng viên:</div>
-                    <div class="status">${course.instructor}</div>
+                <!-- Thông số -->
+                <div class="dp-specs">
+                    <span class="dp-spec-label"><i class="fa-solid fa-chalkboard-user"></i> Giảng viên</span>
+                    <span class="dp-spec-val">${course.instructor}</span>
 
-                    <div class="label">Cấp độ:</div>
-                    <div class="status">${course.levelVietnamese}</div>
+                    <span class="dp-spec-label"><i class="fa-solid fa-signal"></i> Cấp độ</span>
+                    <span class="dp-spec-val">${course.levelVietnamese}</span>
 
-                    <div class="label">Thời lượng:</div>
-                    <div class="status">${course.durationHours} giờ học</div>
+                    <span class="dp-spec-label"><i class="fa-solid fa-clock"></i> Thời lượng</span>
+                    <span class="dp-spec-val">${course.durationHours} giờ học</span>
 
-                    <div class="label">Ngôn ngữ:</div>
-                    <div class="status">${course.language}</div>
+                    <span class="dp-spec-label"><i class="fa-solid fa-language"></i> Ngôn ngữ</span>
+                    <span class="dp-spec-val">${course.language}</span>
                 </div>
 
-                <div class="qty-row">
+                <hr class="dp-divider">
+
+                <!-- Nút hành động -->
+                <div class="dp-cta">
                     <c:choose>
                         <c:when test="${isEnrolled}">
-                            <a href="${pageContext.request.contextPath}/my-courses" class="btn btn-buy"
-                               style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+                            <a href="${pageContext.request.contextPath}/my-courses" class="btn-dp-enrolled">
                                 <i class="fa-solid fa-play"></i> Vào học ngay
                             </a>
                         </c:when>
                         <c:when test="${inCart}">
-                            <a href="${pageContext.request.contextPath}/cart" class="btn btn-call"
-                               style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
-                                <i class="fa-solid fa-cart-shopping"></i> Đã có trong giỏ — Xem giỏ hàng
+                            <a href="${pageContext.request.contextPath}/cart" class="btn-dp-incart">
+                                <i class="fa-solid fa-cart-shopping"></i> Xem giỏ hàng
                             </a>
                         </c:when>
                         <c:otherwise>
-                            <button type="button" id="btnAddToCart" class="add-cart">
+                            <button type="button" id="btnAddToCart" class="btn-dp-add">
                                 <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
                             </button>
-                            <button type="button" id="btnBuyNow" class="btn btn-buy"
-                                    style="margin-left:8px;">
+                            <button type="button" id="btnBuyNow" class="btn-dp-buy">
                                 <i class="fa-solid fa-bolt"></i> Mua ngay
                             </button>
                         </c:otherwise>
                     </c:choose>
                 </div>
 
-                <div class="benefits">
-                    <div class="benefit"><i class="fa-solid fa-infinity"></i>Học không giới hạn thời gian sau khi mua</div>
-                    <div class="benefit"><i class="fa-solid fa-certificate"></i>Nhận chứng chỉ hoàn thành khóa học</div>
-                    <div class="benefit"><i class="fa-solid fa-mobile-screen"></i>Học trên mọi thiết bị: máy tính, điện thoại, máy tính bảng</div>
+                <!-- Lợi ích -->
+                <div class="dp-benefits">
+                    <div class="dp-benefit"><i class="fa-solid fa-infinity"></i>Học không giới hạn thời gian sau khi mua</div>
+                    <div class="dp-benefit"><i class="fa-solid fa-certificate"></i>Nhận chứng chỉ hoàn thành khóa học</div>
+                    <div class="dp-benefit"><i class="fa-solid fa-mobile-screen"></i>Học trên mọi thiết bị</div>
+                    <div class="dp-benefit"><i class="fa-solid fa-shield-halved"></i>Cam kết hoàn tiền trong 7 ngày</div>
                 </div>
-            </section>
-        </div>
+            </div>
 
-        <div class="product-info">
-            <article class="product-card">
-                <div id="descWrap" class="collapse-wrap">
-                    ${course.description}
-                </div>
-                <div class="toggle-btn-wrap">
-                    <button id="toggleDesc" class="toggle-btn">Xem tất cả ▼</button>
-                </div>
-            </article>
-        </div>
-
-        <div id="viewed-root">
-            <aside class="viewed-panel viewed--compact" aria-labelledby="viewed-title">
-                <div class="viewed-header">
-                    <h3 id="viewed-title">Khóa học liên quan</h3>
-                    <a class="btn-view-all" href="${pageContext.request.contextPath}/courses">Xem tất cả</a>
-                </div>
-                <ul class="viewed-list" role="list">
-                    <c:forEach var="rc" items="${relatedCourses}">
-                        <li class="viewed-item">
-                            <div class="viewed-thumb">
-                                <c:if test="${not empty rc.badge}">
-                                    <span class="badge-sale">${rc.badge}</span>
-                                </c:if>
-                                <img src="${rc.thumbnailUrl}" alt="${rc.title}" loading="lazy">
-                            </div>
-                            <div class="viewed-info">
-                                <a href="${pageContext.request.contextPath}/course-detail?id=${rc.id}" class="viewed-name">${rc.title}</a>
-                                <div class="viewed-price">
-                                    <span class="price-now">
+            <!-- Khóa học liên quan -->
+            <c:if test="${not empty relatedCourses}">
+                <div class="dp-related">
+                    <div class="dp-related-header">
+                        <h3><i class="fa-solid fa-layer-group"></i> Khóa học liên quan</h3>
+                        <a href="${pageContext.request.contextPath}/courses">Xem tất cả</a>
+                    </div>
+                    <ul class="dp-related-list">
+                        <c:forEach var="rc" items="${relatedCourses}">
+                            <li class="dp-related-item">
+                                <img class="dp-related-thumb" src="${rc.thumbnailUrl}" alt="${rc.title}" loading="lazy">
+                                <div class="dp-related-info">
+                                    <a href="${pageContext.request.contextPath}/course-detail?id=${rc.id}" class="dp-related-name">${rc.title}</a>
+                                    <div class="dp-related-price">
                                         <c:choose>
-                                            <c:when test="${rc.price == 0}">Miễn phí</c:when>
-                                            <c:otherwise><fmt:formatNumber value="${rc.price}" type="currency" currencySymbol="đ" /></c:otherwise>
+                                            <c:when test="${rc.price == 0}"><span class="dp-related-free">Miễn phí</span></c:when>
+                                            <c:otherwise><fmt:formatNumber value="${rc.price}" type="currency" currencySymbol="₫"/></c:otherwise>
                                         </c:choose>
-                                    </span>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    </c:forEach>
-                </ul>
-            </aside>
-        </div>
-    </div>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </div>
+            </c:if>
 
-    <jsp:include page="/style/footer/footer.jsp" />
+        </div>
+        <!-- end dp-right -->
+
+    </div>
+    <!-- end dp-grid -->
 </div>
 
+<jsp:include page="/style/footer/footer.jsp" />
+
 <script>
-    const COURSE_ID = ${course.id};
+    const ITEM_ID = ${course.id};
+    const ITEM_TYPE = "course";
     const CTX = "${pageContext.request.contextPath}";
 
-    function showToast(message, type) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + (type || 'success');
-        toast.innerHTML = '<i class="fa-solid ' + (type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check') + '"></i> ' + message;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    function showToast(msg, type) {
+        const c = document.getElementById('dp-toast-container');
+        const t = document.createElement('div');
+        t.className = 'dp-toast ' + (type || 'success');
+        t.innerHTML = '<i class="fa-solid ' + (type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check') + '"></i> ' + msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3100);
     }
 
     function addToCart(callback) {
         fetch(CTX + "/cart/add", {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "type=course&id=" + COURSE_ID
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: "type=" + ITEM_TYPE + "&id=" + ITEM_ID
         })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
-                if (data.status === "success" || data.success) {
-                    const badges = document.querySelectorAll(".cart-badge");
-                    badges.forEach(b => { if (data.totalQuantity !== undefined) b.textContent = data.totalQuantity; });
-                    if (callback) {
-                        callback();
-                    } else {
-                        showToast("Đã thêm khóa học vào giỏ hàng!", "success");
-                        // Cập nhật nút sau khi thêm thành công
-                        const btnAdd = document.getElementById("btnAddToCart");
-                        const btnBuy = document.getElementById("btnBuyNow");
-                        if (btnAdd) {
-                            btnAdd.outerHTML = '<a href="' + CTX + '/cart" class="btn btn-call" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;"><i class="fa-solid fa-cart-shopping"></i> Đã có trong giỏ — Xem giỏ hàng</a>';
-                        }
-                        if (btnBuy) btnBuy.style.display = "none";
-                    }
+                if (data.status === "success") {
+                    document.querySelectorAll(".cart-badge").forEach(b => {
+                        b.textContent = data.totalQuantity !== undefined ? data.totalQuantity : (parseInt(b.textContent) || 0) + 1;
+                    });
+                    if (callback) { callback(); return; }
+                    showToast("Đã thêm khóa học vào giỏ hàng!", "success");
+                    const btnAdd = document.getElementById("btnAddToCart");
+                    const btnBuy = document.getElementById("btnBuyNow");
+                    if (btnAdd) btnAdd.outerHTML = '<a href="' + CTX + '/cart" class="btn-dp-incart"><i class="fa-solid fa-cart-shopping"></i> Xem giỏ hàng</a>';
+                    if (btnBuy) btnBuy.style.display = "none";
                 } else {
-                    const msg = data.message || "Vui lòng đăng nhập để thêm vào giỏ.";
-                    if (msg.toLowerCase().includes("login") || msg.toLowerCase().includes("đăng nhập")) {
-                        window.location.href = CTX + "/login";
-                    } else {
-                        showToast("Lỗi: " + msg, "error");
-                    }
+                    if (data.redirect) { window.location.href = data.redirect; return; }
+                    showToast(data.message || "Vui lòng thử lại.", "error");
                 }
             })
-            .catch(err => {
-                console.error(err);
-                showToast("Đã có lỗi xảy ra, vui lòng thử lại.", "error");
-            });
+            .catch(() => showToast("Lỗi kết nối, vui lòng thử lại.", "error"));
     }
 
-    const btnAdd = document.getElementById("btnAddToCart");
-    const btnBuy = document.getElementById("btnBuyNow");
+    document.getElementById("btnAddToCart")?.addEventListener("click", () => addToCart(null));
+    document.getElementById("btnBuyNow")?.addEventListener("click", () => addToCart(() => { window.location.href = CTX + "/cart"; }));
 
-    if (btnAdd) btnAdd.addEventListener("click", () => addToCart(null));
-    if (btnBuy) btnBuy.addEventListener("click", () => addToCart(() => { window.location.href = CTX + "/cart"; }));
-
-    // Description collapse
-    document.addEventListener("DOMContentLoaded", () => {
+    // Collapse / expand mô tả
+    (function () {
         const wrap = document.getElementById("descWrap");
         const btn  = document.getElementById("toggleDesc");
         if (!wrap || !btn) return;
-
         let expanded = false;
-        wrap.style.maxHeight = "300px";
-
         btn.addEventListener("click", () => {
             expanded = !expanded;
-            if (expanded) {
-                wrap.style.maxHeight = wrap.scrollHeight + "px";
-                wrap.classList.add("expanded");
-                btn.textContent = "Thu gọn ▲";
-            } else {
-                wrap.style.maxHeight = "300px";
-                wrap.classList.remove("expanded");
-                btn.textContent = "Xem tất cả ▼";
-            }
+            wrap.classList.toggle("expanded", expanded);
+            btn.textContent = expanded ? "Thu gọn ▲" : "Xem tất cả ▼";
         });
-    });
+    })();
 </script>
 <script src="${pageContext.request.contextPath}/style/header/header.js"></script>
 <script src="${pageContext.request.contextPath}/style/footer/footer.js"></script>

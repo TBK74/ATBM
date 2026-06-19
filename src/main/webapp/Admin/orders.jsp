@@ -112,6 +112,7 @@
                                             <td style="display:flex;gap:6px;flex-wrap:wrap;">
                                                 <c:if test="${o.status == 'Pending'}">
                                                     <form action="orders" method="post" style="display:inline;">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Processing">
@@ -120,6 +121,7 @@
                                                 </c:if>
                                                 <c:if test="${o.status == 'Processing'}">
                                                     <form action="orders" method="post" style="display:inline;">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Completed">
@@ -128,6 +130,7 @@
                                                 </c:if>
                                                 <c:if test="${o.status == 'Pending' || o.status == 'Processing'}">
                                                     <form action="orders" method="post" style="display:inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="id" value="${o.orderId}">
                                                         <input type="hidden" name="status" value="Cancelled">

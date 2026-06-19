@@ -2,6 +2,8 @@ package vn.edu.hcmuaf.fit.controller.admin;
 
 import vn.edu.hcmuaf.fit.dao.OrderDAO;
 import vn.edu.hcmuaf.fit.model.Order;
+import vn.edu.hcmuaf.fit.dao.DocumentAccessDAO;
+import vn.edu.hcmuaf.fit.dao.EnrollmentDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -94,9 +96,9 @@ public class AdminOrderController extends HttpServlet {
             case "Cancelled":
                 if ("Pending".equals(currentStatus) || "Processing".equals(currentStatus)) {
                     OrderDAO.getInstance().updateStatus(orderId, newStatus);
+                    DocumentAccessDAO.getInstance().revokeAccessByOrder(orderId);
+                    EnrollmentDAO.getInstance().revokeEnrollmentByOrder(orderId);
                 }
-                break;
-            default:
                 break;
         }
 

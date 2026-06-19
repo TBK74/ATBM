@@ -88,6 +88,7 @@
                         <section class="card" id="addCourseForm" style="display:none;padding:16px;margin:14px 0;">
                             <h3>Thêm khóa học mới</h3>
                             <form action="courses" method="post" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+                                <input type="hidden" name="csrf_token" value="${csrfToken}">
                                 <input type="hidden" name="action" value="add">
                                 <label>Tên khóa học <input class="input" name="title" required></label>
                                 <label>Giảng viên (AccountID) <input class="input" name="instructorId" type="number" required></label>
@@ -150,6 +151,7 @@
                                                 <td>${c.soldCount}</td>
                                                 <td>
                                                     <form action="courses" method="post" style="display:inline;" onsubmit="return confirm('Xóa khóa học này?')">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="${c.id}">
                                                         <button class="btn btn-danger" type="submit" style="padding:4px 10px;">Xóa</button>

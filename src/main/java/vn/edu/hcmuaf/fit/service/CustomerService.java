@@ -19,4 +19,11 @@ public class CustomerService {
     public Customer getCustomerByAccountId(int accountId) {
         return new CustomerDAO().getCustomerByAccountId(accountId);
     }
+
+    public void ensureCustomerRecord(int accountId) {
+        Customer existing = getCustomerByAccountId(accountId);
+        if (existing == null) {
+            new CustomerDAO().createCustomerRecord(accountId);
+        }
+    }
 }

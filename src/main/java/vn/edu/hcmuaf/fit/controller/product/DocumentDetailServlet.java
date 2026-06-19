@@ -9,6 +9,7 @@ import vn.edu.hcmuaf.fit.model.*;
 import vn.edu.hcmuaf.fit.service.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "DocumentDetailServlet", value = "/document-detail")
 public class DocumentDetailServlet extends HttpServlet {
@@ -24,13 +25,24 @@ public class DocumentDetailServlet extends HttpServlet {
             req.setAttribute("document", doc);
             req.setAttribute("relatedDocs", DocumentService.getInstance().getRelated(id, doc.getCategoryId(), 4));
 
+            // Reviews
+            ReviewService reviewService = ReviewService.getInstance();
+            List<?> reviews = reviewService.getReviewsByProductId(id);
+            req.setAttribute("reviews", reviews);
+            req.setAttribute("reviewCount", reviews.size());
+
             HttpSession session = req.getSession();
             User user = (User) session.getAttribute("auth");
             if (user != null) {
                 int cid = new UserDAO().getCustomerIdByAccountId(user.getAccountID());
-                req.setAttribute("hasAccess", DocumentAccessDAO.getInstance().hasAccess(cid, id));
-                Cart cart = CartService.getInstance().getCart(cid);
-                req.setAttribute("inCart", cart.contains("document", id));
+                if (cid != -1) {
+                    req.setAttribute("hasAccess", DocumentAccessDAO.getInstance().hasAccess(cid, id));
+                    Cart cart = CartService.getInstance().getCart(cid);
+                    req.setAttribute("inCart", cart.contains("document", id));
+                    req.setAttribute("canReview", reviewService.canCustomerReview(cid, id));
+                }
+                req.setAttribute("product", doc);
+                req.setAttribute("auth", user);
             }
             req.getRequestDispatcher("/Documents/document-detail.jsp").forward(req, resp);
         } catch (NumberFormatException e) { resp.sendRedirect("documents"); }
