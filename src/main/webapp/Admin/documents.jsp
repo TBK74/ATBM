@@ -68,6 +68,7 @@
                         <section class="card" id="addDocForm" style="display:none;padding:16px;margin:14px 0;">
                             <h3>Thêm tài liệu mới</h3>
                             <form action="documents" method="post" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+                                <input type="hidden" name="csrf_token" value="${csrfToken}">
                                 <input type="hidden" name="action" value="add">
                                 <label>Tên tài liệu <input class="input" name="title" required></label>
                                 <label>Tác giả <input class="input" name="author"></label>
@@ -126,6 +127,7 @@
                                                 <td>${d.soldCount}</td>
                                                 <td>
                                                     <form action="documents" method="post" style="display:inline;" onsubmit="return confirm('Xóa tài liệu này?')">
+                                                        <input type="hidden" name="csrf_token" value="${csrfToken}">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="${d.id}">
                                                         <button class="btn btn-danger" type="submit" style="padding:4px 10px;">Xóa</button>

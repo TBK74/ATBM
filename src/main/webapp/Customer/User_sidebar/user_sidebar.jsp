@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<%-- Lấy đối tượng User và Customer từ Session --%>
 <c:set var="user" value="${sessionScope.auth}"/>
 <c:set var="customer" value="${sessionScope.customer}"/>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
@@ -46,6 +45,12 @@
             <li class="${fn:contains(currentURI, 'purchase-history') ? 'active' : ''}">
                 <a href="${contextPath}/purchase-history">
                     <i class="fa-regular fa-clock"></i> Lịch sử mua hàng
+                </a>
+            </li>
+
+            <li class="${fn:contains(currentURI, 'key-manager') ? 'active' : ''}">
+                <a href="${contextPath}/key-manager">
+                    <i class="fa-solid fa-key"></i> Quản lý khóa
                 </a>
             </li>
 

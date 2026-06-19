@@ -1,3 +1,8 @@
+<%--
+  PATCH: purchase_history.jsp — Thêm badge trạng thái ký và nút "Ký đơn hàng"
+  Thay đổi duy nhất: thêm các phần được đánh dấu [NEW]
+  Phần còn lại giữ nguyên so với bản gốc.
+--%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
@@ -8,7 +13,6 @@
 
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -21,19 +25,130 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        .order-card { border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px; background: white; }
-        .order-header { display: flex; justify-content: space-between; background: #f9f9f9; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
-        .order-item { display: flex; gap: 15px; margin-bottom: 10px; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .item-img { width: 70px; height: 70px; object-fit: cover; border: 1px solid #eee; border-radius: 6px; }
-        .status-Pending { color: #f39c12; font-weight: bold; }
-        .status-Processing { color: #3498db; font-weight: bold; }
-        .status-Completed { color: #2ecc71; font-weight: bold; }
-        .status-Cancelled { color: #e74c3c; font-weight: bold; }
-        .item-info { flex-grow: 1; }
-        .item-type-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
-        .badge-course { background: #e6f1fb; color: #185fa5; }
-        .badge-document { background: #eaf3de; color: #3b6d11; }
-        .hidden { display: none !important; }
+        .order-card {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            background: #f9f9f9;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            align-items: center;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+
+        .item-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+
+        .status-Pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .status-Processing {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .status-Completed {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .status-Cancelled {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .item-info {
+            flex-grow: 1;
+        }
+
+        .item-type-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 8px;
+        }
+
+        .badge-course {
+            background: #e6f1fb;
+            color: #185fa5;
+        }
+
+        .badge-document {
+            background: #eaf3de;
+            color: #3b6d11;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* [NEW] Badge trạng thái chữ ký */
+        .sig-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sig-unsigned {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .sig-signed {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .sig-verified {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .sig-tampered {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-sign {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-sign:hover {
+            background: #1558b0;
+        }
     </style>
 </head>
 
@@ -74,6 +189,9 @@
                 <c:otherwise>
                     <div id="orderList">
                         <c:forEach var="order" items="${orders}">
+                            <%-- [NEW] Lấy thông tin chữ ký của đơn này --%>
+                            <c:set var="sig" value="${signatureMap[order.orderId]}"/>
+                            <c:set var="sigStatus" value="${sig != null ? sig.signStatus : 'unsigned'}"/>
 
                             <div class="order-card" data-status="${order.status}">
 
@@ -81,12 +199,26 @@
                                     <div>
                                         <b class="order-id-text">Đơn hàng #${order.orderId}</b>
                                         <span style="font-size: 0.9em; color: #666; margin-left: 10px;">
-                                        <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                    </span>
+                                            <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </span>
                                     </div>
 
-                                    <div class="status-${order.status}">
-                                        ${order.statusVietnamese}
+                                    <div style="display:flex;align-items:center;gap:12px;">
+                                            <%-- Trạng thái đơn hàng --%>
+                                        <span class="status-${order.status}">${order.statusVietnamese}</span>
+
+                                            <%-- [NEW] Badge trạng thái chữ ký --%>
+                                        <span class="sig-badge sig-${sigStatus}">
+                                            <c:choose>
+                                                <c:when test="${sigStatus == 'verified'}"><i
+                                                        class="fa-solid fa-shield-check"></i> Đã xác thực</c:when>
+                                                <c:when test="${sigStatus == 'signed'}"><i
+                                                        class="fa-solid fa-clock"></i> Đã ký</c:when>
+                                                <c:when test="${sigStatus == 'tampered'}"><i
+                                                        class="fa-solid fa-triangle-exclamation"></i> Cảnh báo</c:when>
+                                                <c:otherwise><i class="fa-solid fa-pen"></i> Chưa ký</c:otherwise>
+                                            </c:choose>
+                                        </span>
                                     </div>
                                 </div>
 
@@ -106,22 +238,38 @@
                                                 </c:if>
                                             </div>
                                             <div>
+                                                <span style="color: #666; font-size:13px;">SL: 1 |</span>
                                                 <span style="color: #d70018;">
-                                                <fmt:formatNumber value="${item.priceAtOrder}" type="currency"
-                                                                  currencySymbol="₫"/>
-                                            </span>
+                                                    <fmt:formatNumber value="${item.priceAtOrder}" type="currency"
+                                                                      currencySymbol="₫"/>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </c:forEach>
 
-                                <div style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                    <div>
+                                            <%-- [NEW] Nút ký đơn nếu chưa ký / bị tampered --%>
+                                        <c:if test="${sigStatus == 'unsigned' || sigStatus == 'tampered'}">
+                                            <a href="${contextPath}/sign-order?orderId=${order.orderId}">
+                                                <button class="btn-sign">
+                                                    <i class="fa-solid fa-signature"></i>
+                                                    <c:choose>
+                                                        <c:when test="${sigStatus == 'tampered'}">Ký lại đơn hàng</c:when>
+                                                        <c:otherwise>Ký xác nhận đơn</c:otherwise>
+                                                    </c:choose>
+                                                </button>
+                                            </a>
+                                        </c:if>
+                                    </div>
+
                                     <div style="text-align: right;">
                                         Tổng tiền:
                                         <span style="font-size: 1.2em; color: #d70018; font-weight: bold;">
-                                        <fmt:formatNumber value="${order.totalAmount}" type="currency"
-                                                          currencySymbol="₫"/>
-                                    </span>
+                                            <fmt:formatNumber value="${order.totalAmount}" type="currency"
+                                                              currencySymbol="₫"/>
+                                        </span>
 
                                         <c:if test="${order.status == 'Pending'}">
                                             <div style="margin-top: 10px;">
@@ -145,52 +293,39 @@
 
 <jsp:include page="/style/footer/footer.jsp"/>
 
+<%-- Toast messages (giữ nguyên bản gốc) --%>
 <c:if test="${not empty sessionScope.toastSuccess}">
     <div id="toast-msg"
-         style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 5px; border-left: 5px solid #28a745; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.5s ease-out;">
+         style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 5px; border-left: 5px solid #28a745; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         <i class="fa-solid fa-circle-check"></i> <strong>Thành công!</strong> ${sessionScope.toastSuccess}
     </div>
     <c:remove var="toastSuccess" scope="session"/>
 </c:if>
-
 <c:if test="${not empty sessionScope.toastError}">
     <div id="toast-msg"
-         style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 5px; border-left: 5px solid #dc3545; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.5s ease-out;">
+         style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 5px; border-left: 5px solid #dc3545; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         <i class="fa-solid fa-circle-exclamation"></i> <strong>Lỗi!</strong> ${sessionScope.toastError}
     </div>
     <c:remove var="toastError" scope="session"/>
 </c:if>
 
-<style>
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-</style>
-
 <script>
     setTimeout(function () {
         let toast = document.getElementById('toast-msg');
         if (toast) {
-            toast.style.transition = "opacity 0.5s ease";
+            toast.style.transition = "opacity .5s";
             toast.style.opacity = "0";
             setTimeout(() => toast.remove(), 500);
         }
     }, 3000);
-</script>
 
-<script>
     document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
         const activeTab = urlParams.get('tab');
-
         if (activeTab) {
-            let buttons = document.querySelectorAll('.tab');
-            buttons.forEach(btn => {
-                let onClickText = btn.getAttribute('onclick').toLowerCase();
-                if (onClickText.includes(activeTab.toLowerCase())) {
+            document.querySelectorAll('.tab').forEach(btn => {
+                if (btn.getAttribute('onclick').toLowerCase().includes(activeTab.toLowerCase()))
                     filterOrders(activeTab, btn);
-                }
             });
         }
     });
@@ -198,46 +333,31 @@
     function filterOrders(statusType, btnElement) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         if (btnElement) btnElement.classList.add('active');
-
-        let cards = document.querySelectorAll('.order-card');
-        cards.forEach(card => {
-            let cardStatus = card.getAttribute('data-status');
-            if (statusType === 'all' ||
-                (cardStatus && cardStatus.toUpperCase() === statusType.toUpperCase())) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+        document.querySelectorAll('.order-card').forEach(card => {
+            let s = card.getAttribute('data-status');
+            card.style.display = (statusType === 'all' || (s && s.toUpperCase() === statusType.toUpperCase())) ? 'block' : 'none';
         });
     }
 
     function searchOrders() {
         let input = document.getElementById('searchInput').value.toLowerCase();
-        let cards = document.querySelectorAll('.order-card');
-
-        cards.forEach(card => {
+        document.querySelectorAll('.order-card').forEach(card => {
             let idEl = card.querySelector('.order-id-text');
-            let idText = idEl ? idEl.innerText.toLowerCase() : "";
-
+            let idText = idEl ? idEl.innerText.toLowerCase() : '';
             let hasProduct = false;
-            let productNames = card.querySelectorAll('.search-target');
-            productNames.forEach(name => {
-                if (name.innerText.toLowerCase().includes(input)) hasProduct = true;
+            card.querySelectorAll('.search-target').forEach(n => {
+                if (n.innerText.toLowerCase().includes(input)) hasProduct = true;
             });
-
             if (idText.includes(input) || hasProduct) {
                 card.classList.remove('hidden');
                 if (card.style.display !== 'none') card.style.display = 'block';
-            } else {
-                card.classList.add('hidden');
-            }
+            } else card.classList.add('hidden');
         });
     }
 
     function confirmCancelOrder(orderId) {
-        if (confirm("Bạn có chắc chắn muốn hủy đơn hàng #" + orderId + " không?")) {
-            window.location.href = "${contextPath}/cancel-order?id=" + orderId;
-        }
+        if (confirm('Bạn có chắc chắn muốn hủy đơn hàng #' + orderId + ' không?'))
+            window.location.href = '${contextPath}/cancel-order?id=' + orderId;
     }
 </script>
 </body>

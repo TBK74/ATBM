@@ -23,10 +23,23 @@ public class DocumentAccessDAO {
     }
 
     public boolean hasAccess(int customerId, int documentId) {
-        String sql = "SELECT COUNT(*) FROM document_access WHERE CustomerID=? AND DocumentID=?";
+        String sql = "SELECT COUNT(*) FROM document_access da " +
+                "LEFT JOIN orders o ON da.OrderID = o.OrderID " +
+                "WHERE da.CustomerID=? AND da.DocumentID=? " +
+                "AND (o.OrderID IS NULL OR o.Status != 'Cancelled')";
         try (Connection conn = DBConnect.get(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerId); ps.setInt(2, documentId);
             try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getInt(1) > 0; }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean revokeAccessByOrder(int orderId) {
+        String sql = "DELETE FROM document_access WHERE OrderID=?";
+        try (Connection conn = DBConnect.get(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.executeUpdate();
+            return true;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }

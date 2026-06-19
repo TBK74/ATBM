@@ -3,6 +3,8 @@ package vn.edu.hcmuaf.fit.controller.custome;
 import vn.edu.hcmuaf.fit.dao.OrderDAO;
 import vn.edu.hcmuaf.fit.dao.UserDAO;
 import vn.edu.hcmuaf.fit.model.User;
+import vn.edu.hcmuaf.fit.dao.DocumentAccessDAO;
+import vn.edu.hcmuaf.fit.dao.EnrollmentDAO;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -41,6 +43,8 @@ public class CancelOrderController extends HttpServlet {
                 boolean success = orderDAO.cancelOrder(orderId);
 
                 if (success) {
+                    DocumentAccessDAO.getInstance().revokeAccessByOrder(orderId);
+                    EnrollmentDAO.getInstance().revokeEnrollmentByOrder(orderId);
                     session.setAttribute("toastSuccess", "Đơn hàng #" + orderId + " đã được hủy thành công.");
                     targetUrl += "?tab=Cancelled";
                 } else {
