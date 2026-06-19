@@ -1,0 +1,20 @@
+-- ============================================================
+-- PERSON B: Bảng lưu chữ ký điện tử đơn hàng
+-- Không chạm bảng orders đang có — thêm bảng riêng
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS order_signatures (
+    SigID           INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID         INT          NOT NULL UNIQUE,   -- mỗi đơn có đúng 1 bản ghi chữ ký
+    DataHash        VARCHAR(64)  NOT NULL,          -- SHA-256 hex của canonical JSON
+    CanonicalJson   TEXT         NOT NULL,          -- snapshot bất biến để audit sau này
+    Signature       TEXT         NULL,              -- Base64 chữ ký RSA từ client
+    SigningKeyID    INT          NULL,              -- FK -> user_keys.KeyID
+    SignedAt        TIMESTAMP    NULL,
+    SignStatus      ENUM('unsigned','signed','verified','tampered') DEFAULT 'unsigned',
+    LastCheckedAt   TIMESTAMP    NULL,
+    INDEX idx_order (OrderID),
+    INDEX idx_status (SignStatus),
+    FOREIGN KEY (OrderID) REFERENCES orders(OrderID) ON DELETE CASCADE,
+    FOREIGN KEY (SigningKeyID) REFERENCES user_keys(KeyID)
+);
