@@ -1,6 +1,7 @@
 package vn.edu.hcmuaf.fit.service;
 
 import vn.edu.hcmuaf.fit.dao.CartDAO;
+import vn.edu.hcmuaf.fit.service.OrderSignatureService;
 import vn.edu.hcmuaf.fit.dao.EnrollmentDAO;
 import vn.edu.hcmuaf.fit.dao.DocumentAccessDAO;
 import vn.edu.hcmuaf.fit.dao.OrderDAO;
@@ -49,7 +50,7 @@ public class OrderService {
         int orderId = OrderDAO.getInstance().createOrder(order, cart);
 
         if (orderId != -1) {
-            // Grant access: enroll courses, grant document access
+            OrderSignatureService.getInstance().initHash(orderId);
             for (CartItem item : cart.getData().values()) {
                 if ("course".equals(item.getItemType())) {
                     EnrollmentDAO.getInstance().enroll(customerId, item.getItemId(), orderId);

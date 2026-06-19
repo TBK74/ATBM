@@ -33,6 +33,8 @@
                         <a class="menu-item" href="categories">Danh mục</a>
                         <a class="menu-item" href="promocodes">Khuyến mãi</a>
                         <a class="menu-item active" href="orders">Đơn hàng</a>
+                        <a class="menu-item" href="edit-requests">Yêu cầu chỉnh sửa</a>
+                        <a class="menu-item" href="alerts">Cảnh báo</a>
                     </nav>
                     <div class="sidebar-logout">
                         <a class="logout-btn" href="${pageContext.request.contextPath}/logout"
@@ -77,6 +79,13 @@
                             </div>
                         </form>
                     </section>
+
+                    <c:if test="${not empty orderError}">
+                        <div style="background:#fff0f0; border:1px solid #f5c6cb; color:#721c24;
+                 padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> ${orderError}
+                        </div>
+                    </c:if>
 
                     <!-- BẢNG ĐƠN HÀNG -->
                     <section class="card">

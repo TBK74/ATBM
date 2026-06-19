@@ -53,5 +53,5 @@ public class DocumentAccess {
     public void setPageCount(int pageCount) { this.pageCount = pageCount; }
 
     public int getRemainingDownloads() { return maxDownloads - downloadCount; }
-    public boolean canDownload() { return downloadCount < maxDownloads; }
+    public boolean isCanDownload() { return downloadCount < maxDownloads; }
 }

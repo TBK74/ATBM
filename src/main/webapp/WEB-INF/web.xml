@@ -72,17 +72,4 @@
         <url-pattern>/payment/sepay/success</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>AdminAuditController</servlet-name>
-        <servlet-class>vn.edu.hcmuaf.fit.controller.admin.AdminAuditController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>AdminAuditController</servlet-name>
-        <url-pattern>/admin/alerts</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AdminAuditController</servlet-name>
-        <url-pattern>/admin/edit-requests</url-pattern>
-    </servlet-mapping>
-
 </web-app>

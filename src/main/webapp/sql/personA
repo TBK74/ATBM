@@ -1,0 +1,17 @@
+-- ============================================================
+-- PERSON A: Bảng quản lý khóa công khai của người dùng
+-- Không chạm bảng nào đang có sẵn
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS user_keys (
+    KeyID           INT AUTO_INCREMENT PRIMARY KEY,
+    AccountID       INT          NOT NULL,
+    PublicKey       TEXT         NOT NULL,          -- PEM format (SPKI, base64)
+    Algorithm       VARCHAR(20)  NOT NULL DEFAULT 'RSA-2048',
+    Status          ENUM('active','revoked') DEFAULT 'active',
+    CreatedAt       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    RevokedAt       TIMESTAMP    NULL,
+    SuspectedAt     TIMESTAMP    NULL,              -- Thời điểm user khai nghi ngờ lộ khóa
+    INDEX idx_account_status (AccountID, Status),
+    FOREIGN KEY (AccountID) REFERENCES accounts(AccountID) ON DELETE CASCADE
+);
